@@ -1,5 +1,6 @@
 # 1) Run DGE analysis: 
 R CMD BATCH --vanilla Dge_NeuN_LM.R
+
 R CMD BATCH --vanilla Dge_OLIG2_LM.R
 
 # 2) After DGE analysis use:
