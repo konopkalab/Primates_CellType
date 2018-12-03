@@ -1,6 +1,6 @@
 # Primates CellType
 
-This repository contains the data, code, and analyses used in Berto et al. 2018 "Accelerated evolution of oligodendrocytes in human brain"
+This repository contains the data, code, and analyses used in Berto et al. 2019 "Accelerated evolution of oligodendrocytes in human brain"
 
 Organization
 
