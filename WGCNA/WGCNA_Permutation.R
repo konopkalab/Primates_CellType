@@ -53,8 +53,6 @@ for (i in 1:P)
   {
   set.seed(i*100+1)
   print(i)
-  ##bootstrap resample
-  ## select number of permutation resamples
   Y.b <- mclapply(1:P,mc.cores =12, function(i){apply(tab, 2, function(col){sample(col)})}) #Randomize 100 times the within_data
   datPerm[[i]] <- as.data.frame(t(Y.b[[i]]))
   TOM.b[[i]] = TOMsimilarityFromExpr(datPerm[[i]],
@@ -65,10 +63,8 @@ for (i in 1:P)
           TOMDenom = "mean",
           nThreads = 15,
           verbose = 5, 
-          indent = 0) #omega TOM-based connectivity
+          indent = 0)
   hub.b[[i]] = rowSums(TOM.b[[i]])
-  #adj.b = adjacency(Y.b,power=sft.b$powerEstimate)
-  #hub.b = rowSums(adj.b) #k connectivity
   result[,i]<-hub.b[[i]]
 }
 
