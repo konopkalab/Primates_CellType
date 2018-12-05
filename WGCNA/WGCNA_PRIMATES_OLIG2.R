@@ -71,13 +71,12 @@ rownames(kme)=NULL
 write.table(kme,"KME_OLIG2.txt",sep="\t",quote=F)
 
 # Dat Trait Heatmap
-moduleColorsIEGG=moduleColorsAutomatic
 nGenes = ncol(datExpr) 
 nSamples = nrow(datExpr)
-MEs0 = moduleEigengenes(datExpr,moduleColorsIEGG)$eigengenes
-MEsIEGG = MEs0
-MEsIEGG$MEgrey=NULL
-modTraitCor= cor(MEsIEGG, datTraits,method="pearson")
+MEs0 = moduleEigengenes(datExpr,moduleColorsAutomatic)$eigengenes
+MEsTemp = MEs0
+MEsTemp$MEgrey=NULL
+modTraitCor= cor(MEsTemp, datTraits,method="pearson")
 write.table(modTraitCor,"modTraitCor_OLIG2.txt",sep="\t",quote=F)
 modTraitP = corPvalueStudent(modTraitCor, nSamples)
 write.table(modTraitP,"modTraitP_OLIG2.txt",sep="\t",quote=F)
