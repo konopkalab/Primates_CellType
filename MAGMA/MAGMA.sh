@@ -4,10 +4,12 @@
 #gtf_df <- as.data.frame(gtf)
 #gtf_df <- gtf_df[gtf_df$type == "gene" & gtf_df$transcript_type == "protein_coding",]
 #gtf_df$chr = gsub("chr", "", gtf_df$seqnames)
-#gtf_df <- gtf_df[!(gtf_df$chr %in% c("X","Y","M"),]
-#out = data.frame(ENSG=gtf_df$transcript_name, CHR=gtf_df$chr, START=gtf_df$start, STOP=gtf_df$end)
+#toremove <- c("X","Y","M")
+#gtf_df <- gtf_df[!(gtf_df$chr %in% toremove),]
+#out = data.frame(ENSG=gtf_df$gene_name, CHR=gtf_df$chr, START=gtf_df$start, STOP=gtf_df$end)
 #out <- out[!(duplicated(out$ENSG)),]
 #write.table(out, file="gencode.v19.genes.out", quote=F, row.names = F, col.names = F)
+
 
 # Run MAGMA
 # Annotate with magma 
