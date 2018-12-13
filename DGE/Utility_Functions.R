@@ -1,13 +1,33 @@
-
-# Clean genomic data function
-cleaningExp = function(y, mod, svaobj){ 
-		X=cbind(mod,svaobj$sv) 
-		Hat=solve(t(X)%*%X)%*%t(X) 
-		beta=(Hat%*%t(y)) 
-		P=ncol(mod) 
-		cleany=y-t(as.matrix(X[,-c(1:P)])%*%beta[-c(1:P),]) 
-		return(cleany)
+# Gene Ontology enrichment
+dogo <- function(names,universe,species="human", goP = 0.01, 
+	cond=FALSE, ontology = "BP"){
+    if(species=="human"){
+		golib="org.Hs.eg.db"
+		library(golib,character.only=TRUE)
+		gomap= org.Hs.egSYMBOL2EG
+  } else  if (species == "mouse") {
+		golib="org.Mm.eg.db"
+		library(golib,character.only=TRUE)
+		gomap= org.Mm.egSYMBOL2EG
 	}
+  require(GOstats)
+  x=unlist(mget(as.character(names), gomap,ifnotfound = NA))
+  x=x[!is.na(x)]
+  Universe=unlist(mget(as.character(universe),gomap,ifnotfound = NA))
+ Universe=unique(c(Universe[!is.na(Universe)],unique(x)))
+	
+  params <- new("GOHyperGParams", geneIds = unique(x),
+                universeGeneIds = Universe,
+                annotation = golib,
+                ontology = ontology, pvalueCutoff = goP, conditional = cond,
+                testDirection="over")
+  ht=hyperGTest(params)
+  tab=summary(ht)
+  tmp1=geneIdsByCategory(ht)
+  tmp1=tmp1[tab[,1]]
+  tab$IDs=sapply(tmp1,function(y) paste(names(x)[x%in%y],collapse=";"))
+  return(tab)
+}
 
 # HCP function
 hcp <- function(F,Y,k,lambda,lambda2,lambda3,iter=100,tol = 1e-6){
@@ -50,8 +70,6 @@ hcp <- function(F,Y,k,lambda,lambda2,lambda3,iter=100,tol = 1e-6){
 			#### Final Outputs ####
 			return(list(R=R,Z=Z,B=B,U=U,o=o,error=error,error1=error1,error2=error2,dz=dz,db=db,du=du))
 }
-
-
 
 ## VARIANCE EXPLAIN
 # counts = gene x sample matrix
@@ -122,13 +140,14 @@ VarExp <- function(counts, meta, threshold, inter){
 plotVarExp <- function(pvca.res, title){
   suppressPackageStartupMessages(library(ggplot2))
   plot.dat <- data.frame(eff=names(pvca.res), prop=pvca.res)
-  p <- ggplot2::ggplot(plot.dat, aes(x=eff, y=prop))
-  p <- p + ggplot2::ggtitle(title)
-  p <- p + ggplot2::geom_bar(stat="identity", fill="steelblue", colour="steelblue")
-  p <- p + ggplot2::geom_text(aes(label=round(prop,3), y=prop+0.04), size=4)
-  p <- p + ggplot2::scale_x_discrete(limits=names(pvca.res))
-  p <- p + ggplot2::scale_y_continuous(limits = c(0,1))
-  p <- p + ggplot2::labs(x= "Effects", y= "WAPV")
-  p <- p + ggplot2::theme_classic() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  p <- ggplot(plot.dat, aes(x=eff, y=prop))+
+  ggtitle(title)+
+  geom_bar(stat="identity", fill="steelblue", colour="steelblue") +
+  geom_text(aes(label=round(prop,3), y=prop+0.04), size=4) +
+  scale_x_discrete(limits=names(pvca.res)) +
+  scale_y_continuous(limits = c(0,1)) +
+  labs(x= "Effects", y= "WAPV") +
+  theme_classic() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
   p
 }
