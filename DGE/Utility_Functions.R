@@ -71,7 +71,7 @@ hcp <- function(F,Y,k,lambda,lambda2,lambda3,iter=100,tol = 1e-6){
 			return(list(R=R,Z=Z,B=B,U=U,o=o,error=error,error1=error1,error2=error2,dz=dz,db=db,du=du))
 }
 
-## VARIANCE EXPLAIN
+## Variance Explained
 # counts = gene x sample matrix
 # meta = sample x covariate matrix
 # threshold = number of PCA to consider (e.g. 5)
