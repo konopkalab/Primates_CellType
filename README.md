@@ -14,4 +14,4 @@ Organization
     
     5. DECONVOLUTION/ contains example code and input files for deconvolution analysis. 
     
-    6) GENESET/ contains .RData files of gene lists from multiple sources.
+    6. GENESET/ contains .RData files of gene lists from multiple sources.
