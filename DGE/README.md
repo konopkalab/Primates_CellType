@@ -27,3 +27,6 @@ The script simplify the outputs from DGE analysis
 
 ### Details
 The scripts contains codes for visualization based on *ggplot2*
+
+### ADDITIONAL DATA
+Cross-validation directory contains codes for permutations and LOO. 
