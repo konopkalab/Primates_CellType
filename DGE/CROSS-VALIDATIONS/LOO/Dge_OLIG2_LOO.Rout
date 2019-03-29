@@ -1,0 +1,281 @@
+
+R version 3.5.0 (2018-04-23) -- "Joy in Playing"
+Copyright (C) 2018 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> rm(list=ls())
+> # Load libraries
+> suppressPackageStartupMessages(library(sva))
+> suppressPackageStartupMessages(library(limma))
+Warning message:
+package ‘limma’ was built under R version 3.5.1 
+> suppressPackageStartupMessages(library(DESeq2))
+Warning messages:
+1: package ‘IRanges’ was built under R version 3.5.1 
+2: package ‘GenomicRanges’ was built under R version 3.5.1 
+> suppressPackageStartupMessages(library(scales))
+> suppressPackageStartupMessages(library(RColorBrewer))
+> suppressPackageStartupMessages(library(ggplot2))
+> suppressPackageStartupMessages(library(ggjoy))
+> suppressPackageStartupMessages(library(knitr))
+> suppressPackageStartupMessages(library(preprocessCore))
+> suppressPackageStartupMessages(library(variancePartition))
+> suppressPackageStartupMessages(library(doParallel))
+> suppressPackageStartupMessages(library(Biobase))
+> suppressPackageStartupMessages(library(DMwR))
+> suppressPackageStartupMessages(library(DT))
+> suppressPackageStartupMessages(library(randomForest))
+> suppressPackageStartupMessages(library(pROC))
+> suppressPackageStartupMessages(library(ggpubr))
+> suppressPackageStartupMessages(library(dplyr))
+Warning message:
+package ‘dplyr’ was built under R version 3.5.2 
+> suppressPackageStartupMessages(library(reshape2))
+> suppressPackageStartupMessages(library(plyr))
+> suppressPackageStartupMessages(library(xlsx))
+> suppressPackageStartupMessages(library(pheatmap))
+Warning message:
+package ‘pheatmap’ was built under R version 3.5.2 
+> suppressPackageStartupMessages(library(edgeR))
+Warning message:
+package ‘edgeR’ was built under R version 3.5.1 
+> suppressPackageStartupMessages(library(tibble))
+Warning message:
+package ‘tibble’ was built under R version 3.5.2 
+> suppressPackageStartupMessages(library(magrittr))
+> suppressPackageStartupMessages(library(ggplot2))
+> suppressPackageStartupMessages(library(ggpubr))
+> 
+> source("Utility_Functions.R")
+> 
+> ####################################
+> # Load Inputs and filter for Neun+ #
+> ####################################
+> load("OUTPUTS_EXONS_OLIG2/WGCNA_EXONS_OLIG2.RData")
+> 
+> exp <- as.data.frame(t(expQuant))
+> pd <- pd
+> 
+> mod <- model.matrix(~Species+Sex+HumAge+RIN, data =pd)
+> mod0 <- model.matrix(~Sex+HumAge+RIN, data = pd)
+> svaobj <- sva(as.matrix(expQuant),mod,mod0,n.sv=NULL,B=100,method="two-step")
+Number of significant surrogate variables is:  6 
+> svs <- svaobj$sv
+> colnames(svs) <- paste("SV",1:ncol(svs),sep="")
+> pd <- cbind(pd,svs)
+> 
+> B=100  ## select number of times for leave-multiple-out method
+> new_pd <- vector("list", length = B)
+> Y.b <- vector("list",length = B)
+> for (i in 1:B)
++   {
++   new_pd[[i]] <- pd %>% # Subset the tables by 10 samples per each species and creating a 100 leave-multiple-out table
++                   rownames_to_column('Sample') %>% 
++                   group_by(Species) %>% 
++                   filter(!(Species == 'Hsap' & row_number() == sample(1:n(),1)))  %>% 
++                   filter(!(Species == 'PanTro' & row_number() == sample(1:n(),1)))  %>% 
++                   filter(!(Species == 'RheMac' & row_number() == sample(1:n(),1)))  %>% 
++                   column_to_rownames('Sample') %>% 
++                   as.data.frame() %>%
++                   droplevels()
++   Y.b[[i]]=exp[rownames(exp) %in% rownames(new_pd[[i]]),]
++   Y.b[[i]]=Y.b[[i]][match(rownames(new_pd[[i]]),rownames(Y.b[[i]])),]
++ }
+> 
+> 
+> ########################
+> # Anova across SPECIES #
+> ########################
+> 
+> # ANOVA
+> # ANOVA
+> Model <- vector("list", length = B)
+> downsample_OLIG2 <- vector("list",length = B)
+> for (i in 1:B)
++     {
++         downsample_OLIG2[[i]] <- data.frame(matrix(nrow=ncol(Y.b[[i]]), ncol=1, dimnames = list(colnames(Y.b[[i]]), c("Anova"))))
++         {
++         for (j in 1:ncol(Y.b[[i]])) 
++             {   
++             Model[[i]]=tryCatch(anova(lm(as.formula(paste("Y.b[[i]][,j] ~ ", paste(colnames(new_pd[[i]]),collapse = " + "))), data = new_pd[[i]])),warning =  function(w) w)
++                 if (j %% 7500 == 0) {cat(paste("Done on Boot ",i,"\n",sep=""))}
++                 if(typeof(Model[[i]]) == "list"){
++                     downsample_OLIG2[[i]][j,"Anova"] = Model[[i]]$"Pr(>F)"[1]
++                 }
++             }
++         }
++     }
+Done on Boot 1
+Done on Boot 2
+Done on Boot 3
+Done on Boot 4
+Done on Boot 5
+Done on Boot 6
+Done on Boot 7
+Done on Boot 8
+Done on Boot 9
+Done on Boot 10
+Done on Boot 11
+Done on Boot 12
+Done on Boot 13
+Done on Boot 14
+Done on Boot 15
+Done on Boot 16
+Done on Boot 17
+Done on Boot 18
+Done on Boot 19
+Done on Boot 20
+Done on Boot 21
+Done on Boot 22
+Done on Boot 23
+Done on Boot 24
+Done on Boot 25
+Done on Boot 26
+Done on Boot 27
+Done on Boot 28
+Done on Boot 29
+Done on Boot 30
+Done on Boot 31
+Done on Boot 32
+Done on Boot 33
+Done on Boot 34
+Done on Boot 35
+Done on Boot 36
+Done on Boot 37
+Done on Boot 38
+Done on Boot 39
+Done on Boot 40
+Done on Boot 41
+Done on Boot 42
+Done on Boot 43
+Done on Boot 44
+Done on Boot 45
+Done on Boot 46
+Done on Boot 47
+Done on Boot 48
+Done on Boot 49
+Done on Boot 50
+Done on Boot 51
+Done on Boot 52
+Done on Boot 53
+Done on Boot 54
+Done on Boot 55
+Done on Boot 56
+Done on Boot 57
+Done on Boot 58
+Done on Boot 59
+Done on Boot 60
+Done on Boot 61
+Done on Boot 62
+Done on Boot 63
+Done on Boot 64
+Done on Boot 65
+Done on Boot 66
+Done on Boot 67
+Done on Boot 68
+Done on Boot 69
+Done on Boot 70
+Done on Boot 71
+Done on Boot 72
+Done on Boot 73
+Done on Boot 74
+Done on Boot 75
+Done on Boot 76
+Done on Boot 77
+Done on Boot 78
+Done on Boot 79
+Done on Boot 80
+Done on Boot 81
+Done on Boot 82
+Done on Boot 83
+Done on Boot 84
+Done on Boot 85
+Done on Boot 86
+Done on Boot 87
+Done on Boot 88
+Done on Boot 89
+Done on Boot 90
+Done on Boot 91
+Done on Boot 92
+Done on Boot 93
+Done on Boot 94
+Done on Boot 95
+Done on Boot 96
+Done on Boot 97
+Done on Boot 98
+Done on Boot 99
+Done on Boot 100
+> save(downsample_OLIG2,file="LOO_OLIG2.RData")
+> tmp <- downsample_OLIG2
+> 
+> myfiles <- vector("list", length = B)
+> for (i in 1:B)
++     {
++       tmp[[i]] <- tmp[[i]] %>% rownames_to_column('Gene')
++       tmp[[i]]$AnovaAdj <- p.adjust(tmp[[i]]$Anova,method="bonferroni")
++       myfiles[[i]] <- tmp[[i]][tmp[[i]]$AnovaAdj < 0.05,]
++     }
+> 
+> 
+> df <- data.frame(Perm = sapply(myfiles, nrow))
+> obs <- read.table("OUTPUTS_EXONS_OLIG2/SPECIES_DGE.txt")
+> intercept <- nrow(obs[obs$AnovaAdj_Species < 0.05,])
+> pdf("LOO_Histogram_OLIG2.pdf",width=4,height=2,useDingbats=FALSE)
+> gghistogram(df, 
++   x = "Perm", 
++   fill = "magenta4",
++    add = "mean", rug = FALSE,
++    bins = 30)+
++   geom_vline(xintercept=intercept, colour="red",linetype="dashed")+
++   xlab("")
+Warning message:
+In (function (mapping = NULL, data = NULL, ..., xintercept, na.rm = FALSE,  :
+  Using both `xintercept` and `mapping` may not have the desired result as mapping is overwritten if `xintercept` is specified
+
+>   dev.off()
+null device 
+          1 
+> 
+> 
+> AnovaP <- do.call(cbind,downsample_OLIG2) %>% as.data.frame()
+> AnovaP$P_mean <- rowMeans(AnovaP)
+> 
+> obs <- read.table("OUTPUTS_EXONS_OLIG2/SPECIES_DGE.txt")
+> 
+> df <- data.frame(Obs = -log10(obs$Anova_Species), Boot = -log10(AnovaP$P_mean))
+> 
+> pdf("LOO_Anova_OLIG2.pdf",width=4,height=4,useDingbats=FALSE)
+> ggscatter(df, x = "Boot", y = "Obs",
++    color = "magenta4", shape = 21, size = 1, # Points color, shape and size
++    add = "reg.line",  # Add regressin line
++    add.params = list(color = "magenta", fill = "lightgray"), # Customize reg. line
++    conf.int = TRUE, # Add confidence interval
++    cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
++    cor.coeff.args = list(method = "spearman", label.x = 3, label.sep = "\n")
++    )+
++ xlab("-log10(Bootstrap Anova)")+ 
++ ylab("-log10(Observed Anova)")+
++ theme(legend.position="none")
+> dev.off()
+null device 
+          1 
+> 
+> 
+> 
+> proc.time()
+    user   system  elapsed 
+3606.920   12.873 3627.338 
