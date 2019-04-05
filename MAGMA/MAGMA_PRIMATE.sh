@@ -181,27 +181,3 @@ magma --bfile /U3/stefano/src/magma_v1.07/BKG/g1000_eur/g1000_eur \
 --out zBodyMassIndex
 
 R CMD BATCH --vanilla GetDataTable.R
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
