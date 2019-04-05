@@ -9,3 +9,7 @@ Each .RData contains lists of genes selected for enrichment and overlap from dif
 3) Regulators = List of RNA-binding proteins and Transcription factors from multiple studies. 
 
 4) Evolution = List of human specifically expressed genes from multiple studies.
+
+5) PsychENCODE_modules = List of modules from Gandal et al. 2018. 
+
+6) PsychENCODE_DEGs = List of differentially expressed genes from Gandal et al. 2018. 
