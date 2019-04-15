@@ -25,6 +25,8 @@ The script simplify the outputs from DGE analysis
 
 **R CMD BATCH --vanilla Viz_OLIG2.R**
 
+**R CMD BATCH --vanilla Viz_Combined_Primates.R**
+
 ### Details
 The scripts contains codes for visualization based on *ggplot2*
 
