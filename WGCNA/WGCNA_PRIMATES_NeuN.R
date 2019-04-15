@@ -23,7 +23,7 @@ datTraits$HumAge <- as.numeric(datTraits$HumAge)
 ## Powers analysis
 powers = c(seq(2,30,2))
 sft=pickSoftThreshold(datExpr,powerVector=powers,verbose = 5, blockSize= 14000, networkType = "signed",RsquaredCut = 0.85) 
-pdf("SoftThresholdingPower_signed.pdf")
+pdf("SoftThresholdingPower_signed_NeuN.pdf")
 par(mfrow = c(1,2), mar=c(5.1,5.1,4.1,2.1));
 cex1 = 0.9;
 plot(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2], xlab="Soft Threshold (power)",ylab="Scale Free Topology Model Fit, signed R^2",type="n",main = paste("Scale independence"));
@@ -60,15 +60,15 @@ moduleColorsAutomatic = labels2colors(moduleLabelsAutomatic)
 MEsAutomatic=net$MEs
 unique(moduleColorsAutomatic)
 table(moduleColorsAutomatic)
-write.table(moduleColorsAutomatic, "NEUN_colors.txt",sep="\t",quote=F)
-save(net,file="NEUN_net.RData")
+write.table(moduleColorsAutomatic, "NeuN_colors.txt",sep="\t",quote=F)
+save(net,file="NeuN_net.RData")
 
 #KMEs
 KMEs<-signedKME(datExpr, net$MEs,corFnc = "bicor")
 kme=data.frame(rownames(tab), moduleColorsAutomatic, KMEs)
 colnames(kme)[1]="Symbol"
 rownames(kme)=NULL
-write.table(kme,"KME_NEUN.txt",sep="\t",quote=F)
+write.table(kme,"KME_NeuN.txt",sep="\t",quote=F)
 
 # Dat Trait Heatmap
 nGenes = ncol(datExpr) 
@@ -83,12 +83,12 @@ write.table(modTraitP,"modTraitP_NEUN.txt",sep="\t",quote=F)
 textMatrix = paste(signif(modTraitCor, 2), "\n(",signif(modTraitP, 1), ")", sep = "")
 dim(textMatrix) = dim(modTraitCor) 
 par(mar = c(6, 8.5, 3, 3))
-pdf("Heatmap_DatTraits.pdf",width=7,height=7)
+pdf("Heatmap_DatTraits_NeuN.pdf",width=7,height=7)
 labeledHeatmap(Matrix = modTraitCor, xLabels = names(datTraits), yLabels = names(MEsIEGG), ySymbols = names(MEsIEGG), colorLabels =FALSE,colors=blueWhiteRed(50),textMatrix=textMatrix, setStdMargins = FALSE, cex.text = 0.4, zlim = c(-1,1), main = paste("Module Association"))
 dev.off()
 
 #Dendro Plot
-pdf("NetworkDendrogram_NEUN.pdf",width=10,height=3)
+pdf("NetworkDendrogram_NeuN.pdf",width=10,height=3)
 x=cor(datTraits,datExpr,method="pearson")
 x[x > 0.25]=6
 x[x < -0.25]=30
@@ -106,7 +106,7 @@ nGenes = ncol(datExpr)
 nSamples = nrow(datExpr)
 MEs0 = moduleEigengenes(datExpr,moduleColorsAutomatic,softPower = PWR,impute = TRUE)$eigengenes
 MEs0$Rows=colnames(tab)
-write.table(MEs0, "Matrix_module_correlation.txt",sep="\t",quote=F)
+write.table(MEs0, "Matrix_module_correlation_NeuN.txt",sep="\t",quote=F)
 
 # Adjacency matrix
 Adj = adjacency(datExpr, power = PWR,type="signed",corFnc = "bicor")
@@ -115,21 +115,21 @@ moduleOutput[,2]<- moduleColorsAutomatic
 intraCon <- intramodularConnectivity(Adj, moduleColorsAutomatic)
 moduleOutput[,3]<-intraCon$kWithin
 colnames(moduleOutput) <- c("Gene", "ModuleColor", "kWithin")
-write.table(moduleOutput, "ModuleOutput_NEUN.txt", sep="\t", quote=F)
+write.table(moduleOutput, "ModuleOutput_NeuN.txt", sep="\t", quote=F)
 
 # TO connectivity (you need the table as single gene list column in the directory)
 TOM = TOMsimilarityFromExpr(datExpr, power= PWR,corType = "bicor",networkType="signed",TOMType="signed",TOMDenom = "mean",nThreads = 15,verbose = 5, indent = 0)
 colnames(TOM)=rownames(TOM)=colnames(datExpr)
 save(TOM,file="TOM_ourRNA_SIGNED.RData")
 Connectivity=apply(TOM,1,sum)
-save(Connectivity,file="Connectivity.RData")
+save(Connectivity,file="Connectivity_NeuN.RData")
 
 # CytoScape output
-dir.create("Cyto")
+dir.create("Cyto_NeuN")
 for(module in unique(moduleColorsAutomatic)){
 inModule <- is.finite(match(moduleColorsAutomatic, module))
 modTOM <- TOM[inModule, inModule]
-cyt = exportNetworkToCytoscape(modTOM, edgeFile=paste("Cyto/CytoEdge",paste(module,collapse="-"),".txt",sep=""), nodeFile=paste("Cyto/CytoNode",paste(module,collapse="-"),".txt",sep=""), weighted = TRUE, threshold = 0, nodeAttr = moduleColorsAutomatic[inModule], nodeNames = names(datExpr)[inModule])
+cyt = exportNetworkToCytoscape(modTOM, edgeFile=paste("Cyto_NeuN/CytoEdge",paste(module,collapse="-"),".txt",sep=""), nodeFile=paste("Cyto/CytoNode",paste(module,collapse="-"),".txt",sep=""), weighted = TRUE, threshold = 0, nodeAttr = moduleColorsAutomatic[inModule], nodeNames = names(datExpr)[inModule])
 }
 
 # WGCNA barplot output
@@ -137,7 +137,7 @@ library(ggplot2)
 library(reshape2)
 library(RColorBrewer)
 df=melt(MEs0)
-dir.create("Plot")
+dir.create("Plot_NeuN")
 df$Rows=factor(df$Rows, levels = colnames(tab))
 df=df[!df$variable == "MEgrey", ]
 # Function to make the barplot and saving as pdf according to the module name
@@ -159,7 +159,7 @@ doPlot = function(sel_name)
  theme(axis.title.y = element_blank(),
             axis.text.y  = element_text(face="bold", size=6))
     print(PLOT)
-    ggsave(sprintf("Plot/%s.pdf", sel_name))
+    ggsave(sprintf("Plot_NeuN/%s.pdf", sel_name))
  }
 
 lapply(unique(df$variable), doPlot)
