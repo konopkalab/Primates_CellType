@@ -16,4 +16,4 @@ https://www.pnas.org/content/early/2019/11/08/1907982116.short
 | [`MAGMA`](MAGMA/) | Example codes for the GWAS enrichment | 
 | [`SHINY`](SHINY/) | Codes and input data for exploratory shiny app | 
 | [`WGCNA`](WGCNA/) | Codes and input file for WGCNA analysis | 
-| [`GENESET`](GENESET/) | RData files of gene lists from multiple sources | 
+| [`GENESET_DATA`](GENESET_DATA/) | RData files of gene lists from multiple sources | 
