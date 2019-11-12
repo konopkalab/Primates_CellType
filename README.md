@@ -1,4 +1,4 @@
-Primates cell-type analysis
+Accelerated evolution of oligodendrocytes in human brain: Data analysis
 ==========================
 
 This repository contains analysis code for the Primated Cell-types project carried out by researchers at the [Konopka Lab, UTSW](http://konopkalab.org/) and [Soojin Lab, Georgia Tech](http://www.yilab.gatech.edu/).
