@@ -12,8 +12,8 @@ https://www.pnas.org/content/early/2019/11/08/1907982116.short
 # Files
 | directory | contents | 
 | --------- | -------- | 
-| [`DGE`](DGE/) | Inputs/Outputs for DGE analysis | 
+| [`DGE`](DGE/) | Codes and Inputs/Outputs for DGE analysis | 
 | [`MAGMA`](MAGMA/) | Example codes for the GWAS enrichment | 
 | [`SHINY`](SHINY/) | Codes and input data for exploratory shiny app | 
-| [`WGCNA`](WGCNA/) | Codes and input file for WGCNA analysis | 
+| [`WGCNA`](WGCNA/) | Codes and Inputs/Outputs for WGCNA analysis | 
 | [`GENESET_DATA`](GENESET_DATA/) | RData files of gene lists from multiple sources | 
